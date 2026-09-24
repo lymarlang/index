@@ -1,0 +1,14 @@
+# Lyra Package Index Entry
+
+package: {
+    description: "Nested Object Language (NOL) parser and serializer for Limitly",
+    name: "nol",
+    repository: "https://github.com/lymarlang/nol.git"
+  }
+versions: {
+    "0.1.0": {
+      git: "https://github.com/lymarlang/nol.git",
+      hash: "sha256:f5e8a3b0e234dcce154b911548fdab7401e5200c2c0f0edfbd32b2cf983b9efe",
+      tag: "v0.1.0"
+    }
+  }

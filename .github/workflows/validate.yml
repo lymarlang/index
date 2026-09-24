@@ -1,0 +1,86 @@
+name: Validate Package Manifests
+
+on:
+  pull_request:
+    paths:
+      - 'packages/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Validate Package Manifests
+        run: |
+          python - << 'EOF'
+          import os
+          import sys
+          import re
+
+          packages_dir = 'packages'
+          if not os.path.exists(packages_dir):
+              print(f"Error: {packages_dir} directory does not exist.")
+              sys.exit(1)
+
+          semver_regex = re.compile(r'^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$')
+          errors = []
+
+          for root, _, files in os.walk(packages_dir):
+              for file in files:
+                  if not file.endswith('.nol'):
+                      errors.append(f"{os.path.join(root, file)}: File must have .nol extension")
+                      continue
+                  
+                  file_path = os.path.join(root, file)
+                  pkg_stem = os.path.splitext(file)[0]
+                  
+                  try:
+                      with open(file_path, 'r', encoding='utf-8') as f:
+                          content = f.read()
+                  except Exception as e:
+                      errors.append(f"{file_path}: Failed to read file: {e}")
+                      continue
+
+                  # Basic structural checks
+                  if "package:" not in content:
+                      errors.append(f"{file_path}: Missing 'package:' section")
+                  if "versions:" not in content:
+                      errors.append(f"{file_path}: Missing 'versions:' section")
+
+                  # Check name matching
+                  name_match = re.search(r'name:\s*"([^"]+)"', content)
+                  if name_match:
+                      pkg_name = name_match.group(1)
+                      if pkg_name != pkg_stem:
+                          errors.append(f"{file_path}: package.name '{pkg_name}' does not match filename '{pkg_stem}.nol'")
+                  else:
+                      errors.append(f"{file_path}: Missing package.name declaration")
+
+                  # Validate hash format if present
+                  hashes = re.findall(r'hash:\s*"([^"]+)"', content)
+                  for h in hashes:
+                      if not h.startswith("sha256:"):
+                          errors.append(f"{file_path}: Invalid hash format '{h}', must begin with sha256:")
+
+                  print(f"Validated {file_path}")
+
+          if errors:
+              print("\nValidation failed with errors:")
+              for err in errors:
+                  print(f"  - {err}")
+              sys.exit(1)
+
+          print("\nAll package manifests passed validation!")
+          EOF

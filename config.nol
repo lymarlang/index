@@ -1,0 +1,9 @@
+# Limitly Package Registry Configuration
+
+index: {
+  version: "1.0",
+  name: "lymarlang/index",
+  canonical_url: "https://github.com/lymarlang/index.git",
+  protocol: "git",
+  package_path: "packages"
+}
