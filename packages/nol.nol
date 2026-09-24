@@ -8,7 +8,7 @@ package: {
 versions: {
     "0.1.0": {
       git: "https://github.com/lymarlang/nol.git",
-      hash: "sha256:f5e8a3b0e234dcce154b911548fdab7401e5200c2c0f0edfbd32b2cf983b9efe",
+      hash: "sha256:006d25a29669360a9632990f3b05d2037a2778f190572fde1fa5b95cfef4fb79",
       tag: "v0.1.0"
     }
   }
